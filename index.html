@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Incentivos - Jefe Visual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0B2B5C;
+            --blue-accent: #1058B0;
+            --yellow: #FFD100;
+            --bg-gray: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #CBD5E1;
+            --text-dark: #1E293B;
+            --text-muted: #475569;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-gray); color: var(--text-dark); padding: 12px; }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 20px; }
+        
+        /* Header Ejecutivo */
+        .header {
+            background: linear-gradient(135deg, var(--navy), var(--blue-accent));
+            color: white; border-radius: 16px; padding: 20px; text-align: center;
+            box-shadow: 0 4px 12px rgba(11, 43, 92, 0.25); margin-bottom: 12px;
+        }
+        .header h1 { font-size: 1.4rem; color: var(--yellow); font-weight: 700; margin: 0; }
+        .header p { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+        /* Tarjetas */
+        .card {
+            background: var(--card-bg); border-radius: 12px; padding: 16px;
+            border-left: 5px solid var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 12px;
+        }
+        .card-title { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+        
+        /* Inputs y Labels */
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+        input, select {
+            width: 100%; padding: 10px 12px; font-size: 1.05rem; font-weight: 600;
+            border: 2px solid var(--navy); border-radius: 10px; margin-bottom: 12px;
+            outline: none; transition: border-color 0.2s;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* Chips de Estatus */
+        .chip { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; margin-right: 5px; }
+        .chip-green { background-color: #D1FAE5; color: #065F46; }
+        .chip-red { background-color: #FEE2E2; color: #991B1B; }
+        .chip-yellow { background-color: #FEF3C7; color: #92400E; }
+        .chip-blue { background-color: #DBEAFE; color: #1E3A8A; }
+        
+        /* Cajas de Métricas Intermedias */
+        .metrica-box {
+            background: #EBF3FC; border-radius: 12px; padding: 12px; text-align: center; margin-top: 5px;
+        }
+        .metrica-etiqueta { font-size: 0.8rem; color: #475569; font-weight: 600; margin-bottom: 2px; }
+        .metrica-valor { font-size: 1.4em; font-weight: 700; color: var(--navy); }
+        
+        /* Tarjeta de Resultado Final */
+        .result-card {
+            background: linear-gradient(135deg, var(--navy), var(--blue-accent));
+            border-radius: 16px; padding: 24px 20px; text-align: center; color: white;
+            box-shadow: 0 6px 20px rgba(11, 43, 92, 0.3); margin-top: 16px;
+        }
+        .result-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+        .result-total { font-size: 2.5rem; font-weight: 700; color: var(--yellow); }
+        .result-breakdown { font-size: 0.85rem; color: #EBF3FC; margin-top: 12px; }
+        
+        /* Footer */
+        .footer { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 20px; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>🏆 Calculadora de Incentivos</h1>
+        <p>Puesto: Jefe Visual</p>
+    </div>
+
+    <!-- SECCIÓN 1: VENTA DE CENTRO -->
+    <div class="card" style="border-left-color: var(--navy);">
+        <div class="card-title">🏬 1. Venta de Centro</div>
+        
+        <label for="cump-pct">% Cumplimiento de Meta de Venta:</label>
+        <input type="number" id="cump-pct" placeholder="Ej: 107" value="107" min="0" max="200" step="0.1" oninput="calcular()">
+
+        <div id="chip-venta"></div>
+
+        <div class="metrica-box">
+            <div class="metrica-etiqueta">💰 Incentivo Base Obtendible</div>
+            <div class="metrica-valor" id="res-inc-base">$0.00</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: MULTIPLICADOR DE FALTANTE -->
+    <div class="card" style="border-left-color: var(--blue-accent);">
+        <div class="card-title">🔍 2. Multiplicador de FALTANTE</div>
+        
+        <label for="faltante-rango">Rango de Faltante de Tienda:</label>
+        <select id="faltante-rango" onchange="calcular()">
+            <option value="1.1" selected>Menor a 1.0% (Multiplicador 1.1x)</option>
+            <option value="1.0">1.0% a 1.5% (Multiplicador 1.0x)</option>
+            <option value="0.9">Mayor o igual a 1.5% (Multiplicador 0.9x)</option>
+        </select>
+
+        <div id="chip-faltante"></div>
+
+        <div class="metrica-box">
+            <div class="metrica-etiqueta">✖️ Multiplicador Aplicado</div>
+            <div class="metrica-valor" id="res-mult-valor">1.1x</div>
+        </div>
+    </div>
+
+    <!-- TARJETA DE RESULTADO FINAL -->
+    <div class="result-card">
+        <div class="result-title">🏆 TU INCENTIVO FINAL DEL MES</div>
+        <div class="result-total" id="total-incentivo">$0.00 MXN</div>
+        <div class="result-breakdown" id="desglose-texto">Cargando desglose...</div>
+    </div>
+
+    <div class="footer">
+        Esquema de Incentivos para Jefe Visual
+    </div>
+</div>
+
+<script>
+    const formater = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+    function calcular() {
+        // 1. Obtener Porcentaje de Cumplimiento directamente
+        const cumpPct = parseFloat(document.getElementById('cump-pct').value) || 0;
+        const multFaltante = parseFloat(document.getElementById('faltante-rango').value) || 1.0;
+
+        // 2. Determinar Incentivo Base por Venta de Centro
+        let incBase = 0;
+        if (cumpPct < 95) {
+            incBase = 0;
+        } else if (cumpPct < 100) {
+            incBase = 800;
+        } else if (cumpPct < 105) {
+            incBase = 1100;
+        } else if (cumpPct < 110) {
+            incBase = 1500;
+        } else if (cumpPct < 115) {
+            incBase = 1900;
+        } else if (cumpPct < 120) {
+            incBase = 2300;
+        } else if (cumpPct < 125) {
+            incBase = 2800;
+        } else {
+            incBase = 3300;
+        }
+
+        document.getElementById('res-inc-base').innerText = formater.format(incBase);
+
+        // Chip Estatus Venta
+        let chipVentaHtml = "";
+        if (cumpPct < 95) {
+            chipVentaHtml = `<span class="chip chip-red">❌ Cumplimiento < 95% (Sin Incentivo)</span>`;
+        } else if (cumpPct < 100) {
+            chipVentaHtml = `<span class="chip chip-yellow">⚠️ Cumplimiento Parcial (95% - 99.9%)</span>`;
+        } else {
+            chipVentaHtml = `<span class="chip chip-green">✅ Meta Cumplida (≥ 100%)</span>`;
+        }
+        document.getElementById('chip-venta').innerHTML = chipVentaHtml;
+
+        // Chip Estatus Faltante
+        let chipFaltanteHtml = "";
+        if (multFaltante === 1.1) {
+            chipFaltanteHtml = `<span class="chip chip-green">🚀 Faltante < 1.0% (+10% Bonificación)</span>`;
+        } else if (multFaltante === 1.0) {
+            chipFaltanteHtml = `<span class="chip chip-blue">ℹ️ Faltante 1.0% - 1.5% (Sin ajuste)</span>`;
+        } else {
+            chipFaltanteHtml = `<span class="chip chip-red">⚠️ Faltante ≥ 1.5% (-10% Penalización)</span>`;
+        }
+        document.getElementById('chip-faltante').innerHTML = chipFaltanteHtml;
+        document.getElementById('res-mult-valor').innerText = multFaltante.toFixed(1) + "x";
+
+        // 3. Incentivo Final (Incentivo Base * Multiplicador Faltante)
+        const totalFinal = incBase * multFaltante;
+
+        // Mostrar resultado final
+        document.getElementById('total-incentivo').innerText = formater.format(totalFinal) + " MXN";
+        document.getElementById('desglose-texto').innerHTML = 
+            `Incentivo Base: <b>${formater.format(incBase)}</b> | Multiplicador Faltante: <b>${multFaltante.toFixed(1)}x</b>`;
+    }
+
+    // Ejecutar al cargar la pantalla
+    window.onload = calcular;
+</script>
+</body>
+</html>
